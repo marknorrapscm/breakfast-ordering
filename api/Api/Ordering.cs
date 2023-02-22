@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -6,83 +6,22 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
-using System.Configuration;
 using Microsoft.Azure.Cosmos;
 using System.Linq;
 using tomas_breakfast.Repositories;
 using tomas_breakfast.DTOs;
+using Newtonsoft.Json;
 using tomas_breakfast.Models;
 
 namespace tomas_breakfast.Api
 {
-
-    public static class Api
+    public static class Ordering
     {
-        //////////////////////////////////////
-        //////////////////////////////////////
-        ////    Config
-        //////////////////////////////////////
-        //////////////////////////////////////
-        [FunctionName("GetFormData")]
-        public static async Task<IActionResult> GetFormData(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "Config/FormData")] HttpRequest req,
-            [CosmosDB(Connection = "CosmosDbConnectionString")] CosmosClient client,
-            ILogger log)
-        {
-            var staffRepo = new StaffRepository(client);
-            var menuItemsRepo = new MenuItemsRepository(client);
-
-            var staff = await staffRepo.GetAll();
-            var menuItems = await menuItemsRepo.GetAll();
-
-            var configDto = new ConfigDTO();
-            configDto.staff = staff.Where(x => x.isActive).OrderBy(x => x.name).ToList();
-            configDto.menuItems = menuItems.OrderBy(x => x.item).ToList();
-
-            return new OkObjectResult(configDto);
-        }
-
-        [FunctionName("AddStaff")]
-        public static async Task<IActionResult> AddStaff(
-            [HttpTrigger(AuthorizationLevel.Function, "post", Route = "Config/FormData/Staff")] HttpRequest req,
-            [CosmosDB(Connection = "CosmosDbConnectionString")] CosmosClient client,
-            ILogger log)
-        {
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            dynamic postData = JsonConvert.DeserializeObject(requestBody);
-
-            var staffEntity = new StaffEntity()
-            {
-                id = Guid.NewGuid().ToString(),
-                name = postData.staffName,
-                isActive = true
-            };
-
-            var staffRepo = new StaffRepository(client);
-            var res = await staffRepo.Add(staffEntity);
-
-            if (res)
-            {
-                return new OkResult();
-            }
-            else
-            {
-                return new BadRequestObjectResult("The request was fine but the order didn't get created :(");
-            }
-        }
-
-
-        //////////////////////////////////////
-        //////////////////////////////////////
-        ////    Ordering
-        //////////////////////////////////////
-        //////////////////////////////////////
         [FunctionName("GetLatestOrder")]
         public static async Task<IActionResult> GetLatestOrder(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "Ordering/LatestOrder")] HttpRequest req,
-            [CosmosDB(Connection = "CosmosDbConnectionString")] CosmosClient client,
-            ILogger log)
+             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "Ordering/LatestOrder")] HttpRequest req,
+             [CosmosDB(Connection = "CosmosDbConnectionString")] CosmosClient client,
+             ILogger log)
         {
             var orderDayRepo = new OrderDayRepository(client);
             var orderRepo = new OrderRepository(client);
@@ -109,7 +48,7 @@ namespace tomas_breakfast.Api
             return new OkObjectResult(orderDto);
         }
 
-        [FunctionName("AddOrder")]
+        [FunctionName("AddToLatestOrder")]
         public static async Task<IActionResult> AddToLatestOrder(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = "Ordering/LatestOrder")] HttpRequest req,
             [CosmosDB(Connection = "CosmosDbConnectionString")] CosmosClient client,
@@ -152,15 +91,9 @@ namespace tomas_breakfast.Api
                 res = await orderRepo.Add(existingOrder);
             }
 
-            if (res)
-            {
-                return new OkResult();
-            }
-            else
-            {
-                return new BadRequestObjectResult("The request was fine but the order didn't get created :(");
-            }
+            return res
+                ? new OkResult()
+                : new BadRequestObjectResult("The request was fine but the order didn't get created :(");
         }
-
     }
 }
