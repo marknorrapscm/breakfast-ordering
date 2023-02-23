@@ -24,7 +24,10 @@ Super basic app for ordering breakfast. Hosted in Azure with Azure Functions, Co
 
 ### Frontend config:
 
-#### `.env` template:
+#### Quick and nasty `.env` template:
 ```
-REACT_APP_BaseUrl=https://whateverName.azurewebsites.net
+REACT_APP_BaseUrl=
+REACT_APP_BaseUrlDev=
+
+REACT_APP_ForceUseOfProduction=
 ```

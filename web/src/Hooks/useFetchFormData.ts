@@ -1,8 +1,11 @@
 import { MenuItemModel, StaffModel } from "../Models/Models";
 import { useQuery } from "react-query";
+import { getBaseUrl } from "../Utility/utility";
+
+const url = `${getBaseUrl()}/Config/FormData`;
 
 const fetchFormData = async (): Promise<ConfigDTO> => {
-	const res = await fetch(`${process.env.REACT_APP_GetFormDataUrl}`, {
+	const res = await fetch(url, {
 		method: "GET",
 		// mode: "no-cors", // specify nothing in prop
 		mode: "cors", // local
@@ -13,9 +16,7 @@ const fetchFormData = async (): Promise<ConfigDTO> => {
 		}
 	});
 
-	console.log(res);
 	const data = await res.json();
-	console.log(data);
 
 	return data as ConfigDTO;
 };

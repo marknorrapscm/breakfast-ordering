@@ -1,16 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, Card, Col, Container, Row } from "react-bootstrap";
 import { StaffModel } from "./Models/Models";
 import { useFetchFormData } from "./Hooks/useFetchFormData";
 import { LoadingWrapper } from "./Components/LoadingWrapper";
 import { MenuItemSelectList } from "./Components/MenuItemSelectList";
 import { useFetchLatestOrder } from "./Hooks/useFetchLatestOrder";
+import { OrderListModal } from "./Components/OrderListModal";
 
 
 function App() {
 
 	const { config, isLoading: isFormDataLoading } = useFetchFormData();
 	const { latestOrders, isLoading: isLatestOrdersLoading } = useFetchLatestOrder();
+	const [isOrderListModalOpen, setIsOrderListModalOpen] = useState<boolean>(false);
 
 	return (
 		<Container className="app py-4">
@@ -33,7 +35,10 @@ function App() {
 										<div className="py-2" style={{ fontSize: "1.25rem" }}>{staff.name}</div>
 									</Col>
 									<Col>
-										<MenuItemSelectList staff={staff} />
+										<MenuItemSelectList
+											staff={staff}
+											existingOrder={latestOrders.orders.find(x => x.staffId === staff.id)}
+										/>
 									</Col>
 								</Row>
 							))}
@@ -42,13 +47,18 @@ function App() {
 				</Col>
 			</Row>
 
-			<Row>
+			<Row className="mt-2">
 				<Col>
-					<Button variant="success">
+					<Button variant="success" onClick={() => setIsOrderListModalOpen(true)}>
 						Generate order list
 					</Button>
 				</Col>
 			</Row>
+
+			<OrderListModal
+				isOpen={isOrderListModalOpen}
+				close={() => setIsOrderListModalOpen(false)}
+			/>
 		</Container>
 	);
 }

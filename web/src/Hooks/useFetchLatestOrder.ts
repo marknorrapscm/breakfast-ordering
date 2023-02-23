@@ -1,7 +1,10 @@
 import { useQuery } from "react-query";
+import { getBaseUrl } from "../Utility/utility";
+
+const url = `${getBaseUrl()}/Ordering/LatestOrder`;
 
 const fetchLatestOrder = async (): Promise<LatestOrderDTO> => {
-	const res = await fetch(`${process.env.REACT_APP_GetLatestOrderUrl}`, {
+	const res = await fetch(url, {
 		method: "GET",
 		// mode: "no-cors", // specify nothing in prop
 		mode: "cors", // local
@@ -12,9 +15,7 @@ const fetchLatestOrder = async (): Promise<LatestOrderDTO> => {
 		}
 	});
 
-	console.log(res);
 	const data = await res.json();
-	console.log(data);
 
 	return data as LatestOrderDTO;
 };

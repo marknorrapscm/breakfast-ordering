@@ -3,22 +3,23 @@ import { Button, Form, Spinner } from "react-bootstrap";
 import { MenuItemModel, StaffModel } from "../Models/Models";
 import React, { useState } from "react";
 import { usePostRequest } from "../Hooks/usePostRequest";
+import { OrderDTO } from "../Hooks/useFetchLatestOrder";
 
 const defaultSelectText = "Select...";
 
 interface Props {
 	staff: StaffModel;
-	selectedItem?: string;
+	existingOrder: OrderDTO | undefined;
 }
 
 const postData = async () => {
 	//
 };
 
-export const MenuItemSelectList = ({ staff, selectedItem }: Props) => {
+export const MenuItemSelectList = ({ staff, existingOrder }: Props) => {
 
 	const { config } = useFetchFormData();
-	const [hasSelectionBeenMade, setHasSelectionBeenMade] = useState<boolean>(selectedItem !== "" && selectedItem !== undefined);
+	const [hasSelectionBeenMade, setHasSelectionBeenMade] = useState<boolean>(existingOrder !== undefined);
 	const { isLoading, performPost } = usePostRequest();
 
 	const onSelectChange = async (staffId: string, menuItem: string) => {
@@ -40,7 +41,7 @@ export const MenuItemSelectList = ({ staff, selectedItem }: Props) => {
 		<div className="d-flex">
 			<Form.Select
 				size="lg"
-				defaultValue={defaultSelectText}
+				defaultValue={existingOrder === undefined ? defaultSelectText : existingOrder.menuItem}
 				style={{
 					borderTopRightRadius: 0,
 					borderBottomRightRadius: 0

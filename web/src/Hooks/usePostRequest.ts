@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { getBaseUrl } from "../Utility/utility";
 
 interface ReturnType {
 	isLoading: boolean;
 	performPost: (staffId: string, menuItem: string) => Promise<boolean>;
 }
+
+const url = `${getBaseUrl()}/Ordering/LatestOrder`;
 
 export const usePostRequest = (): ReturnType => {
 
@@ -12,7 +15,7 @@ export const usePostRequest = (): ReturnType => {
 	const performPost = async (staffId: string, menuItem: string) => {
 		setIsLoading(true);
 
-		const response = await fetch(`${process.env.REACT_APP_AddOrderUrl}`, {
+		const response = await fetch(url, {
 			method: "POST",
 			mode: "cors",
 			headers: {
