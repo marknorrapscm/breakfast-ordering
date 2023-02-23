@@ -12,6 +12,7 @@ using tomas_breakfast.Repositories;
 using tomas_breakfast.DTOs;
 using Newtonsoft.Json;
 using tomas_breakfast.Models;
+using System.Collections.Generic;
 
 namespace tomas_breakfast.Api
 {
@@ -19,7 +20,7 @@ namespace tomas_breakfast.Api
     {
         [FunctionName("GetLatestOrder")]
         public static async Task<IActionResult> GetLatestOrder(
-             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "Ordering/LatestOrder")] HttpRequest req,
+             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Ordering/LatestOrder")] HttpRequest req,
              [CosmosDB(Connection = "CosmosDbConnectionString")] CosmosClient client,
              ILogger log)
         {
@@ -50,7 +51,7 @@ namespace tomas_breakfast.Api
 
         [FunctionName("AddToLatestOrder")]
         public static async Task<IActionResult> AddToLatestOrder(
-            [HttpTrigger(AuthorizationLevel.Function, "post", Route = "Ordering/LatestOrder")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "Ordering/LatestOrder")] HttpRequest req,
             [CosmosDB(Connection = "CosmosDbConnectionString")] CosmosClient client,
             ILogger log)
         {
@@ -60,12 +61,12 @@ namespace tomas_breakfast.Api
             var orderDayRepo = new OrderDayRepository(client);
             var latestOrderDay = await orderDayRepo.GetLatest();
 
-            var cutoffDate = DateTime.Parse($"{latestOrderDay.date}T{latestOrderDay.cutoffTime}Z");
+            //var cutoffDate = DateTime.Parse($"{latestOrderDay.date}T{latestOrderDay.cutoffTime}Z");
 
-            if (DateTime.Now > cutoffDate)
-            {
-                return new BadRequestObjectResult($"You're ordering too late! Cuttof was {cutoffDate.ToString("yyyy-MM-dd @ HH:mm")}");
-            }
+            //if (DateTime.Now > cutoffDate)
+            //{
+            //    return new BadRequestObjectResult($"You're ordering too late! Cuttof was {cutoffDate.ToString("yyyy-MM-dd @ HH:mm")}");
+            //}
 
             var newOrderEntity = new OrderEntity()
             {
@@ -94,6 +95,35 @@ namespace tomas_breakfast.Api
             return res
                 ? new OkResult()
                 : new BadRequestObjectResult("The request was fine but the order didn't get created :(");
+        }
+
+        [FunctionName("GenerateOrderList")]
+        public static async Task<IActionResult> GenerateOrderList(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Ordering/LatestOrder/OrderList")] HttpRequest req,
+            [CosmosDB(Connection = "CosmosDbConnectionString")] CosmosClient client,
+            ILogger log)
+        {
+            var orderDayRepo = new OrderDayRepository(client);
+            var latestOrderDay = await orderDayRepo.GetLatest();
+
+            var orderRepo = new OrderRepository(client);
+            var orders = await orderRepo.GetOrdersForDay(latestOrderDay.id);
+
+            var menuItemFrequency = new Dictionary<string, int>();
+
+            foreach (var order in orders)
+            {
+                if (menuItemFrequency.ContainsKey(order.menuItemId))
+                {
+                    menuItemFrequency[order.menuItemId]++;
+                }
+                else
+                {
+                    menuItemFrequency[order.menuItemId] = 1;
+                }
+            }
+
+            return new OkObjectResult(menuItemFrequency);
         }
     }
 }

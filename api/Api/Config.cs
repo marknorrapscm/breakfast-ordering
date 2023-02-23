@@ -20,7 +20,7 @@ namespace tomas_breakfast.Api
     {
         [FunctionName("GetFormData")]
         public static async Task<IActionResult> GetFormData(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "Config/FormData")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Config/FormData")] HttpRequest req,
             [CosmosDB(Connection = "CosmosDbConnectionString")] CosmosClient client,
             ILogger log)
         {
@@ -39,7 +39,7 @@ namespace tomas_breakfast.Api
 
         [FunctionName("AddStaff")]
         public static async Task<IActionResult> AddStaff(
-            [HttpTrigger(AuthorizationLevel.Function, "post", Route = "Config/Staff")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "Config/Staff")] HttpRequest req,
             [CosmosDB(Connection = "CosmosDbConnectionString")] CosmosClient client,
             ILogger log)
         {
