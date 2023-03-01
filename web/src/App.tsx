@@ -6,7 +6,7 @@ import { LoadingWrapper } from "./Components/LoadingWrapper";
 import { MenuItemSelectList } from "./Components/MenuItemSelectList";
 import { useFetchLatestOrder } from "./Hooks/useFetchLatestOrder";
 import { OrderListModal } from "./Components/OrderListModal";
-import Countdown from "react-countdown";
+import { CountdownTimer } from "./Components/CountdownTimer";
 
 
 function App() {
@@ -87,25 +87,5 @@ function App() {
 		</Container>
 	);
 }
-
-const CountdownTimer = ({ date }: { date: Date }) => {
-
-	const renderer = ({ hours, minutes, seconds, completed }: { hours: number, minutes: number, seconds: number, completed: boolean }) => {
-		if (completed) {
-			return <div>You are late!</div>;
-		} else {
-			return (
-				<div style={{ color: "#f5b00f" }}>
-					Time left to order:&nbsp;
-					{minutes.toString().padStart(2, "0")}:{seconds.toString().padStart(2, "0")}
-				</div>
-			);
-		}
-	};
-
-	return (
-		<Countdown date={date} zeroPadTime={2} renderer={renderer}/>
-	);
-};
 
 export default App;
