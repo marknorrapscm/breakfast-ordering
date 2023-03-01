@@ -15,8 +15,7 @@ function App() {
 	const { latestOrders, isLoading: isLatestOrdersLoading } = useFetchLatestOrder();
 	const [isOrderListModalOpen, setIsOrderListModalOpen] = useState<boolean>(false);
 
-	// const countdownDate = new Date(`${latestOrders.date} ${latestOrders.cutoffTime}`);
-	const countdownDate = new Date("2023-03-01 00:30");
+	const countdownDate = new Date(`${latestOrders.date} ${latestOrders.cutoffTime}`);
 	const minutesUntilCountdownDate = ((Number(countdownDate) - Number(new Date())) / 1000 / 60);
 
 	return (
