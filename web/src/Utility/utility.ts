@@ -1,5 +1,5 @@
 export const getBaseUrl = () => {
-	const forceUseOfProduction = process.env.ForceUseOfProduction === "true";
+	const forceUseOfProduction = process.env.REACT_APP_ForceUseOfProduction === "true";
 
 	if(process.env.NODE_ENV.includes("dev") && !forceUseOfProduction) {
 		return process.env.REACT_APP_BaseUrlDev;

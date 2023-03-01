@@ -46,15 +46,20 @@ namespace tomas_breakfast.Api
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             dynamic postData = JsonConvert.DeserializeObject(requestBody);
 
-            var staffEntity = new StaffEntity()
+            var namesCsv = Convert.ToString(postData.staffNames) as string;
+
+            var staffEntities = namesCsv.Split(',').Select(name =>
             {
-                id = Guid.NewGuid().ToString(),
-                name = postData.staffName,
-                isActive = true
-            };
+                return new StaffEntity()
+                {
+                    id = Guid.NewGuid().ToString(),
+                    name = name.Trim(),
+                    isActive = true
+                };
+            }).ToList();
 
             var staffRepo = new StaffRepository(client);
-            var res = await staffRepo.Add(staffEntity);
+            var res = await staffRepo.Add(staffEntities);
 
             return res
                 ? new OkResult()

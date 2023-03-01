@@ -16,15 +16,55 @@ const postData = async () => {
 	//
 };
 
-export const MenuItemSelectList = ({ staff, existingOrder }: Props) => {
+class MenuWithOptGroups {
+	optGroup: string = "";
+	menuItems: Array<MenuItemModel> = [];
+
+	constructor(optGroup: string) {
+		this.optGroup = optGroup;
+	}
+}
+
+export const MenuItemSelectList = React.memo(({ staff, existingOrder }: Props) => {
+
+	if(existingOrder) {
+		console.log(existingOrder.menuItem);
+	}
 
 	const { config } = useFetchFormData();
+
+	const [selectedMenuItem, setSelectedMenuItem] = useState<string | undefined>(existingOrder?.menuItem);
+
+	const [menuItemsWithOptGroups, setMenuItemsWithOptGroups] = useState<Array<MenuWithOptGroups>>([]);
+
 	const [hasSelectionBeenMade, setHasSelectionBeenMade] = useState<boolean>(existingOrder !== undefined);
+
 	const { isLoading, performPost } = usePostRequest();
 
+	React.useEffect(() => {
+		const optGroups = [
+			new MenuWithOptGroups("Sodas"),
+			new MenuWithOptGroups("Baps")
+		];
+
+		if(config && config.menuItems) {
+			config.menuItems.forEach(x => {
+				const indexToUse = x.id.includes("soda") ? 0 : 1;
+				optGroups[indexToUse].menuItems.push(x);
+			});
+
+			setMenuItemsWithOptGroups(optGroups);
+		}
+	}, [config]);
+
 	const onSelectChange = async (staffId: string, menuItem: string) => {
+		setSelectedMenuItem(menuItem);
 		const res = await performPost(staff.id, menuItem);
 		setHasSelectionBeenMade(res);
+
+		if(!res) {
+			console.error("Something went wrong saving the menu item");
+		}
 	};
 
 	const getButtonVariant = () => {
@@ -41,7 +81,7 @@ export const MenuItemSelectList = ({ staff, existingOrder }: Props) => {
 		<div className="d-flex">
 			<Form.Select
 				size="lg"
-				defaultValue={existingOrder === undefined ? defaultSelectText : existingOrder.menuItem}
+				value={selectedMenuItem}
 				style={{
 					borderTopRightRadius: 0,
 					borderBottomRightRadius: 0
@@ -50,14 +90,21 @@ export const MenuItemSelectList = ({ staff, existingOrder }: Props) => {
 					onSelectChange(staff.id, e.target.value);
 				}}
 			>
-				<option disabled>{defaultSelectText}</option>
+				<option value={""} hidden>
+					{defaultSelectText}
+				</option>
 
-				{config.menuItems.map((menuItem: MenuItemModel) => (
-					<option
-						key={menuItem.id}
-					>
-						{menuItem.id}
-					</option>
+				{menuItemsWithOptGroups.map(x => (
+					<optgroup key={x.optGroup} label={x.optGroup}>
+						{x.menuItems.map(menuItem => (
+							<option
+								key={menuItem.id}
+								value={menuItem.id}
+							>
+								{menuItem.id}
+							</option>
+						))}
+					</optgroup>
 				))}
 			</Form.Select>
 
@@ -75,5 +122,5 @@ export const MenuItemSelectList = ({ staff, existingOrder }: Props) => {
 			</Button>
 		</div>
 	);
-};
+});
 
